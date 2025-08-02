@@ -22,6 +22,7 @@ app.use("/api/v1/auth" , require("./routes/AuthRoutes"));
 app.use("/api/v1/expense" , require("./routes/expenseRoutes"));
 app.use("/api/v1/goal" , require("./routes/GoalRoutes"));
 app.use("/api/v1/monthly-budget" , require("./routes/MonthlyBudgetRoutes"));
+app.use("/api/v1/wallet" , require("./routes/WalletRoutes"))
 
 
 
