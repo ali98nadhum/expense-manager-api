@@ -21,50 +21,107 @@ model User {
   password      String
   expenses      Expense[]
   goals         Goal[]
+  goalFunds     GoalFunding[]
   todos         Todo[]
-  Notification  Notification[]
+  subTasks      SubTask[]
+  notifications Notification[]
+  budgets       MonthlyBudget[]
+  wallets       Wallet[]
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @updatedAt @map("updated_at")
-  MonthlyBudget MonthlyBudget[]
+}
+
+model MonthlyBudget {
+  id         Int       @id @default(autoincrement())
+  month      Int
+  year       Int
+  totalLimit Float
+  note       String?
+  user       User      @relation(fields: [userId], references: [id])
+  userId     Int
+  wallets    Wallet[]
+  expenses   Expense[]
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+}
+
+model Wallet {
+  id             Int            @id @default(autoincrement())
+  name           String
+  balance        Float          @default(0)
+  monthlyBudget  MonthlyBudget @relation(fields: [budgetId], references: [id])
+  budgetId       Int
+  user           User           @relation(fields: [userId], references: [id])
+  userId         Int
+  expenses       Expense[]
+  goalFundings   GoalFunding[]
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
 }
 
 model Expense {
-  id        Int            @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   title     String
   amount    Float
   category  String
-  date      DateTime       @default(now())
+  date      DateTime  @default(now())
   note      String?
-  user      User           @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
   userId    Int
+  wallet    Wallet    @relation(fields: [walletId], references: [id])
+  walletId  Int
   budget    MonthlyBudget? @relation(fields: [budgetId], references: [id])
   budgetId  Int?
-  createdAt DateTime       @default(now()) @map("created_at")
-  updatedAt DateTime       @updatedAt @map("updated_at")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
 }
 
 model Goal {
-  id            Int       @id @default(autoincrement())
+  id            Int            @id @default(autoincrement())
   title         String
   targetAmount  Float
-  currentAmount Float     @default(0)
+  currentAmount Float          @default(0)
   deadline      DateTime?
-  status        Status    @default(IN_PROGRESS)
-  user          User      @relation(fields: [userId], references: [id])
+  status        Status         @default(IN_PROGRESS)
+  user          User           @relation(fields: [userId], references: [id])
   userId        Int
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  fundings      GoalFunding[]
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+}
+
+model GoalFunding {
+  id        Int     @id @default(autoincrement())
+  goal      Goal    @relation(fields: [goalId], references: [id])
+  goalId    Int
+  wallet    Wallet  @relation(fields: [walletId], references: [id])
+  walletId  Int
+  amount    Float
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  date      DateTime @default(now())
 }
 
 model Todo {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
   description String?
-  done        Boolean  @default(false)
-  user        User     @relation(fields: [userId], references: [id])
+  done        Boolean   @default(false)
+  user        User      @relation(fields: [userId], references: [id])
   userId      Int
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  subTasks    SubTask[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+}
+
+model SubTask {
+  id        Int      @id @default(autoincrement())
+  title     String
+  done      Boolean  @default(false)
+  todo      Todo     @relation(fields: [todoId], references: [id])
+  todoId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
 }
 
 model Notification {
@@ -78,15 +135,5 @@ model Notification {
   updatedAt DateTime @updatedAt @map("updated_at")
 }
 
-model MonthlyBudget {
-  id         Int       @id @default(autoincrement())
-  month      Int
-  year       Int
-  totalLimit Float
-  note       String?
-  user       User      @relation(fields: [userId], references: [id])
-  userId     Int
-  expenses   Expense[]
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
-}
+
+
