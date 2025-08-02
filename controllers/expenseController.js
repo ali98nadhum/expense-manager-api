@@ -5,6 +5,9 @@ const prisma = new PrismaClient();
 
 
 
+
+
+
 // ==================================
 // @desc Creater new expense
 // @route /api/v1/auth/expense
@@ -38,6 +41,45 @@ module.exports.createExpense = asyncHandler(async (req, res) => {
 });
 
 
+// ==================================
+// @desc Update expense
+// @route /api/v1/auth/expense/:id
+// @method PUT
+// @access private ( for user login )
+// ==================================
+module.exports.updateExpenseById = asyncHandler(async (req, res) => {
+  const { title, amount, category, date, note } = req.body;
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const expense = await prisma.expense.findUnique({
+    where: { id: parseInt(id) },
+  });
+
+  if (!expense) {
+    return res.status(404).json({ message: "لا يوجد مصروف بهذا المعرف" });
+  }
+
+  if (expense.userId !== userId) {
+    return res.status(403).json({ message: "ليس لديك صلاحية لتحديث هذا المصروف" });
+  }
+
+  const updatedExpense = await prisma.expense.update({
+    where: { id: parseInt(id) },
+    data: {
+      title: title ?? expense.title,
+      amount: amount ?? expense.amount,
+      category: category ?? expense.category,
+      date: date ?? expense.date,
+      note: note ?? expense.note,
+    },
+  });
+
+  return res.status(200).json({
+    message: "تم تحديث المصروف بنجاح",
+    data: updatedExpense,
+  });
+});
 
 
 
