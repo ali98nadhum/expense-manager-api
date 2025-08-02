@@ -20,6 +20,7 @@ app.use(
 
 app.use("/api/v1/auth" , require("./routes/AuthRoutes"));
 app.use("/api/v1/expense" , require("./routes/expenseRoutes"));
+app.use("/api/v1/goal" , require("./routes/GoalRoutes"));
 
 
 
