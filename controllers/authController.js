@@ -2,6 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const {hashPassword} = require("../utils/hashPassword");
+const {generateToken } = require("../utils/generateToken");
 const prisma = new PrismaClient();
 
 // ==================================
@@ -54,7 +55,7 @@ module.exports.login = asyncHandler(async (req, res) => {
   }
 
   // Generate a JWT token 
-  const token = generateToken(user.id, user.name, user.role);
+  const token = generateToken(user.id, user.name);
 
   res.status(200).json({ message: "login success", token: token });
 });
