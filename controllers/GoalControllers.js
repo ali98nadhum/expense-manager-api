@@ -4,6 +4,16 @@ const prisma = new PrismaClient();
 
 
 
+module.exports.getAllGoal = asyncHandler(async(req , res) =>{
+ const userId = req.user.id;
+
+ const goals = await prisma.goal.findMany({
+    where: {userId:userId}
+ })
+
+ res.status(200).json({data: goals})
+})
+
 
 module.exports.createGoal = asyncHandler(async(req , res) => {
     const {title , targetAmount , currentAmount , deadline} = req.body;
