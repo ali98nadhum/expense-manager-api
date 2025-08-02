@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { createExpense, updateExpenseById, getAllExpense } = require("../controllers/expenseController");
+const { createExpense, updateExpenseById, getAllExpense, getExpenseById } = require("../controllers/expenseController");
 const AuthService = require("../utils/AuthService");
 
 
@@ -8,6 +8,7 @@ router.route("/")
 .get(AuthService.protect , getAllExpense)
 
 router.route("/:id")
+.get(AuthService.protect , getExpenseById)
 .put(AuthService.protect,updateExpenseById)
 
 module.exports = router;

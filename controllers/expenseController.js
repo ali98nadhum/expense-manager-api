@@ -28,6 +28,31 @@ module.exports.getAllExpense = asyncHandler(async (req, res) => {
 
 
 
+module.exports.getExpenseById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const expense = await prisma.expense.findUnique({
+    where: { id: parseInt(id) },
+  });
+
+  if (!expense) {
+    return res.status(404).json({ message: "لم يتم العثور على المصروف" });
+  }
+
+  if (expense.userId !== userId) {
+    return res.status(403).json({ message: "ليس لديك صلاحية لعرض هذا المصروف" });
+  }
+
+  res.status(200).json({
+    message: "تم جلب المصروف بنجاح",
+    data: expense,
+  });
+});
+
+
+
+
 
 
 // ==================================
@@ -101,6 +126,31 @@ module.exports.updateExpenseById = asyncHandler(async (req, res) => {
     message: "تم تحديث المصروف بنجاح",
     data: updatedExpense,
   });
+});
+
+
+
+module.exports.deleteExpenseById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  const expense = await prisma.expense.findUnique({
+    where: { id: parseInt(id) },
+  });
+
+  if (!expense) {
+    return res.status(404).json({ message: "لم يتم العثور على المصروف" });
+  }
+
+  if (expense.userId !== userId) {
+    return res.status(403).json({ message: "ليس لديك صلاحية لحذف هذا المصروف" });
+  }
+
+  await prisma.expense.delete({
+    where: { id: parseInt(id) },
+  });
+
+  res.status(200).json({ message: "تم حذف المصروف بنجاح" });
 });
 
 
