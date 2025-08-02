@@ -23,7 +23,7 @@ module.exports.createGoal = asyncHandler(async(req , res) => {
         data: {
             title,
             targetAmount: parseFloat(targetAmount),
-            currentAmount: parseFloat(currentAmount),
+            currentAmount: parseFloat(currentAmount) || parseFloat(0),
             deadline: deadline ? new Date(deadline) : null,
             userId
         }

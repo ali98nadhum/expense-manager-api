@@ -18,6 +18,7 @@ module.exports.getAllExpense = asyncHandler(async (req, res) => {
     where: {
       userId: userId,
     },
+    include:{wallet: true},
     orderBy: {
       date: 'desc',
     },
@@ -34,6 +35,7 @@ module.exports.getExpenseById = asyncHandler(async (req, res) => {
 
   const expense = await prisma.expense.findUnique({
     where: { id: parseInt(id) },
+    include: { wallet: true }
   });
 
   if (!expense) {
@@ -62,13 +64,23 @@ module.exports.getExpenseById = asyncHandler(async (req, res) => {
 // @access private ( for user login )
 // ==================================
 module.exports.createExpense = asyncHandler(async (req, res) => {
-  const { title, amount, category, date, note } = req.body;
-
+  const { title, amount, category, date, note , walletId } = req.body;
   const userId = req.user.id;
 
-  if (!title || !amount || !category) {
-    return res.status(400).json({ message: "يرجى ملء جميع الحقول المطلوبة" });
+ const wallet = await prisma.wallet.findUnique({
+  where: {id: parseInt(walletId) },
+ })
+ if(!wallet){
+  return res.status(404).json({ message: "المحفظة غير موجودة" });
+ }
+
+ await prisma.wallet.update({
+  where: {id: parseInt(walletId) },
+  data: {
+    balance: wallet.balance - parseFloat(amount)
   }
+
+ })
 
   const expense = await prisma.expense.create({
     data: {
@@ -77,6 +89,7 @@ module.exports.createExpense = asyncHandler(async (req, res) => {
       category,
       date: date ? new Date(date) : new Date(),
       note,
+      walletId,
       userId,
     },
   });
@@ -101,6 +114,7 @@ module.exports.updateExpenseById = asyncHandler(async (req, res) => {
 
   const expense = await prisma.expense.findUnique({
     where: { id: parseInt(id) },
+    include: { wallet: true }
   });
 
   if (!expense) {
@@ -110,6 +124,14 @@ module.exports.updateExpenseById = asyncHandler(async (req, res) => {
   if (expense.userId !== userId) {
     return res.status(403).json({ message: "ليس لديك صلاحية لتحديث هذا المصروف" });
   }
+
+  const amountDifference = parseFloat(amount) - expense.amount;
+  const updatedWalletBalance = expense.wallet.balance - amountDifference;
+
+  await prisma.wallet.update({
+    where: { id: expense.wallet.id },
+    data: { balance: updatedWalletBalance }
+  })
 
   const updatedExpense = await prisma.expense.update({
     where: { id: parseInt(id) },
