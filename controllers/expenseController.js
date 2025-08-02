@@ -5,6 +5,28 @@ const prisma = new PrismaClient();
 
 
 
+// ==================================
+// @desc Get all expense
+// @route /api/v1/auth/expense
+// @method GET
+// @access private ( for user login )
+// ==================================
+module.exports.getAllExpense = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  const expenses = await prisma.expense.findMany({
+    where: {
+      userId: userId,
+    },
+    orderBy: {
+      date: 'desc',
+    },
+  });
+
+  res.status(200).json({data: expenses});
+});
+
+
 
 
 
